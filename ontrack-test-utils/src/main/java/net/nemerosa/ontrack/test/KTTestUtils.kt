@@ -24,3 +24,9 @@ fun <T> assertNotPresent(o: Optional<T>, message: String = "Optional is not pres
         fail(message)
     }
 }
+
+fun plural(value: String, count: Int) =
+        if (count > 1) "${value}s" else value
+
+
+fun plural(count: Int) = plural("", count)

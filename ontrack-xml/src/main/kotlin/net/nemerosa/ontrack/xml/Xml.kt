@@ -61,7 +61,7 @@ class Xml {
             e.setAttribute(this, o.toString())
         }
 
-        fun element(name: String, code: XmlElement.() -> Unit) {
+        fun element(name: String, code: XmlElement.() -> Unit = {}) {
             val child = dom.createElement(name)
             e.appendChild(child)
             XmlElement(child).code()

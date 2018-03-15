@@ -17,6 +17,7 @@ ext {
 dependencies {
     testCompile project(':ontrack-client')
     testCompile project(':ontrack-dsl')
+    testCompile project(':ontrack-xml')
     testCompile project(':ontrack-dsl-shell')
     testCompile project(':ontrack-test-utils')
     testCompile 'org.codehaus.groovy:groovy-all'
