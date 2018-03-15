@@ -80,35 +80,85 @@ class XMLRunListener(
     }
 
     fun render(file: File) {
-        Xml.document("testsuite") {
-            "tests" to runs.size
-            "skipped" to runs.values.count { it.ignored }
-            "failures" to runs.values.count { it.failure != null }
-            "errors" to runs.values.count { it.error != null }
-            "time" to ((runs.values.sumByDouble { it.time.toDouble() }) / 1000L)
+        testsuite(
+                tests = runs.size,
+                skipped = runs.values.count { it.ignored },
+                failures = runs.values.count { it.failure != null },
+                errors = runs.values.count { it.error != null },
+                time = ((runs.values.sumByDouble { it.time.toDouble() }) / 1000L)
+        ) {
             runs.values.forEach { run ->
-                element("testcase") {
-                    "name" to run.description.methodName
-                    "classname" to run.description.className
-                    "time" to (run.time / 1000)
+                testcase(
+                        name = run.description.methodName,
+                        classname = run.description.className,
+                        time = (run.time.toDouble() / 1000)
+                ) {
                     if (run.ignored) {
-                        element("skipped")
-                    } else if (run.error != null) {
-                        element("failure") {
-                            "message" to run.error?.message
-                            "type" to run.error!!::class.qualifiedName
-                            "errorMessage" to run.error?.errorMessage()
-                        }
-                    } else if (run.failure != null) {
-                        element("failure") {
-                            "message" to run.error?.message
-                            "type" to run.error!!::class.qualifiedName
-                            "errorMessage" to run.error?.errorMessage()
-                        }
+                        skipped()
+                    }
+                    run.error?.apply {
+                        failure(
+                                message = message,
+                                type = this::class.java.name,
+                                errorMessage = errorMessage()
+                        )
+                    }
+                    run.failure?.apply {
+                        failure(
+                                message = message,
+                                type = this::class.java.name,
+                                errorMessage = errorMessage()
+                        )
                     }
                 }
             }
         } to file
+    }
+
+    private fun testsuite(
+            tests: Int,
+            skipped: Int,
+            failures: Int,
+            errors: Int,
+            time: Double,
+            code: TestSuite.() -> Unit
+    ): Xml = Xml.document("testsuite") {
+        "tests" to tests
+        "skipped" to skipped
+        "failures" to failures
+        "errors" to errors
+        "time" to time
+        TestSuite(this).code()
+    }
+
+    private class TestSuite(private val e: Xml.XmlElement) {
+        fun testcase(
+                name: String,
+                classname: String,
+                time: Double,
+                code: TestCase.() -> Unit
+        ) {
+            e.element("testcase") {
+                "name" to name
+                "classname" to classname
+                "time" to time
+                TestCase(this).code()
+            }
+        }
+    }
+
+    private class TestCase(private val e: Xml.XmlElement) {
+        fun skipped() {
+            e.element("skipped")
+        }
+
+        fun failure(message: String, type: String, errorMessage: String) {
+            e.element("failure") {
+                "message" to message
+                "type" to type
+                +errorMessage
+            }
+        }
     }
 
     private fun Failure.errorMessage() =
