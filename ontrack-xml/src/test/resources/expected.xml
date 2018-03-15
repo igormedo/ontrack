@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<testsuite error="1" failure="0" ignored="0" success="1">
+    <testcase classname="myTest" name="method1" time="1234"/>
+    <testcase classname="myTest" name="method2" time="1234">
+        <failure length="100">stacktrace</failure>
+    </testcase>
+</testsuite>
